@@ -1,0 +1,35 @@
+# .NET - arquivos gerados
+**/bin/
+**/obj/
+**/out/
+.vs/
+*.user
+*.suo
+
+# Banco de dados local SQLite
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Segredos e variáveis de ambiente
+.env
+.env.*
+!.env.example
+secrets.json
+
+# Angular e Node
+**/node_modules/
+**/dist/
+**/coverage/
+**/.angular/
+**/npm-debug.log*
+
+# Logs
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,236 @@
+<div class="page">
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-icon">J</span>
+      <span>Jornada<span class="brand-light">Flow</span></span>
+    </a>
+    <span class="topbar-label">GESTÃO DE JORNADA</span>
+    @if (token) {
+      <button class="logout-button" type="button" (click)="logout()">Sair</button>
+    }
+  </header>
+
+  @if (!token) {
+    <main class="hero">
+      <section class="hero-content">
+        <span class="eyebrow"><span class="status-dot"></span> CONTROLE DE JORNADA INTELIGENTE</span>
+        <h1>Sua jornada de trabalho, <span>sob controle.</span></h1>
+        <p class="description">
+          Registre seus horários, acompanhe suas horas trabalhadas e consulte seu histórico em um só lugar.
+          Simples, organizado e pronto para equipes em diferentes fusos horários.
+        </p>
+
+        <div class="features">
+          <div class="feature">
+            <span class="feature-icon">◷</span>
+            <div>
+              <strong>Registro de horários</strong>
+              <p>Entrada e saída em poucos cliques.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">▤</span>
+            <div>
+              <strong>Histórico organizado</strong>
+              <p>Consulte suas jornadas registradas.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">◎</span>
+            <div>
+              <strong>Horários internacionais</strong>
+              <p>Registros armazenados em UTC.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="footer-note">Feito para uma rotina de trabalho mais transparente.</p>
+      </section>
+
+      <section class="login-card">
+        <div class="card-mark">JF</div>
+
+        <h2>{{ isRegisterMode ? 'Crie sua conta' : 'Bem-vindo!' }}</h2>
+        <p class="card-description">
+          {{ isRegisterMode
+            ? 'Cadastre-se para começar a registrar sua jornada.'
+            : 'Entre na sua conta para acessar sua jornada.' }}
+        </p>
+
+        <form (ngSubmit)="isRegisterMode ? register() : login()">
+          @if (isRegisterMode) {
+            <label for="name">Nome completo</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Seu nome"
+              autocomplete="name"
+              [(ngModel)]="name"
+              required
+            />
+          }
+
+          <label for="email">E-mail</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="voce@empresa.com"
+            autocomplete="email"
+            [(ngModel)]="email"
+            required
+          />
+
+          <label for="password">Senha</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Digite sua senha"
+            [attr.autocomplete]="isRegisterMode ? 'new-password' : 'current-password'"
+            [(ngModel)]="password"
+            required
+            minlength="8"
+          />
+
+          @if (errorMessage) {
+            <p class="message error-message" role="alert">{{ errorMessage }}</p>
+          }
+
+          @if (successMessage) {
+            <p class="message success-message" role="status">{{ successMessage }}</p>
+          }
+
+          <button class="primary-button" type="submit" [disabled]="loading">
+            {{ loading
+              ? (isRegisterMode ? 'Criando conta...' : 'Entrando...')
+              : (isRegisterMode ? 'Criar minha conta' : 'Entrar na plataforma') }}
+            <span>→</span>
+          </button>
+        </form>
+
+        <p class="demo-note">
+          {{ isRegisterMode ? 'Já tem uma conta?' : 'Ainda não tem uma conta?' }}
+          <button
+            class="auth-toggle"
+            type="button"
+            (click)="toggleAuthMode()"
+            [disabled]="loading"
+          >
+            {{ isRegisterMode ? 'Fazer login' : 'Criar conta' }}
+          </button>
+        </p>
+
+        <p class="security-note">⌑ Acesso protegido à sua conta</p>
+      </section>
+    </main>
+  } @else {
+    <main class="dashboard">
+      <div class="dashboard-heading">
+        <div>
+          <span class="eyebrow"><span class="status-dot"></span> SUA ÁREA DE TRABALHO</span>
+          <h1>Painel de <span>jornada</span></h1>
+          <p class="description">Acompanhe seus registros de entrada e saída.</p>
+        </div>
+        <div class="today-card">
+          <span>HOJE</span>
+          <strong>{{ today | date:'dd/MM/yyyy' }}</strong>
+          <span>{{ today | date:'EEEE' }}</span>
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <p class="message error-message" role="alert">{{ errorMessage }}</p>
+      }
+
+      @if (successMessage) {
+        <p class="message success-message" role="status">{{ successMessage }}</p>
+      }
+
+      <section class="status-card">
+        <div>
+          <span class="section-label">STATUS DA JORNADA</span>
+          <h2>{{ activeEntry ? 'Jornada em andamento' : 'Nenhuma jornada ativa' }}</h2>
+          <p>
+            {{ activeEntry
+              ? 'Sua entrada foi registrada às ' + (activeEntry.startedAt | date:'HH:mm:ss')
+              : 'Inicie sua jornada quando começar a trabalhar.' }}
+          </p>
+        </div>
+        <div class="action-buttons">
+          <button
+            class="primary-button"
+            type="button"
+            (click)="startWorkday()"
+            [disabled]="actionLoading || !!activeEntry"
+          >
+            Iniciar jornada
+          </button>
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="endWorkday()"
+            [disabled]="actionLoading || !activeEntry"
+          >
+            Encerrar jornada
+          </button>
+        </div>
+      </section>
+
+      <section class="history-section">
+        <div class="history-heading">
+          <div>
+            <h2>Histórico de jornadas</h2>
+            <p>Seus registros salvos no sistema.</p>
+          </div>
+          <button class="secondary-button" type="button" (click)="loadEntries()">
+            Atualizar histórico
+          </button>
+        </div>
+
+        @if (entries.length === 0) {
+          <div class="empty-state">
+            <span class="feature-icon">◷</span>
+            <h3>Nenhum registro encontrado</h3>
+            <p>Quando você iniciar uma jornada, ela aparecerá aqui.</p>
+          </div>
+        } @else {
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Entrada</th>
+                  <th>Saída</th>
+                  <th>Duração</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of entries; track entry.id) {
+                  <tr>
+                    <td>{{ entry.startedAt | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ entry.startedAt | date:'HH:mm:ss' }}</td>
+                    <td>{{ entry.endedAt ? (entry.endedAt | date:'HH:mm:ss') : '—' }}</td>
+                    <td>{{ formatDuration(entry.durationMinutes) }}</td>
+                    <td>
+                      <span [class.active-badge]="!entry.endedAt" class="status-badge">
+                        {{ entry.endedAt ? 'Concluída' : 'Em andamento' }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    </main>
+  }
+
+  <footer class="page-footer">
+    <span>JornadaFlow © 2026</span>
+    <span>Gestão de jornada de trabalho</span>
+  </footer>
+</div>
